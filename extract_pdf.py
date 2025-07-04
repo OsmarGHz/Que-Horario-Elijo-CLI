@@ -3,31 +3,6 @@ import pandas as pd
 import re
 import os
 
-# def limpiar_encabezados(lineas):
-#     """
-#     Quita las primeras 3 líneas (encabezado general) y el encabezado de la tabla,
-#     aunque esté fragmentado en varias líneas.
-#     """
-#     # Quitar las primeras 3 líneas
-#     lineas = lineas[3:]
-
-#     # Buscar la línea que contiene 'NRC' (inicio del encabezado de la tabla)
-#     try:
-#         idx_nrc = next(i for i, l in enumerate(lineas) if l.strip().upper() == "NRC")
-#     except StopIteration:
-#         # Si no se encuentra, regresar las líneas tal cual
-#         return lineas
-
-#     # Buscar la primera línea vacía después del encabezado de la tabla
-#     idx_fin = idx_nrc
-#     while idx_fin < len(lineas) and lineas[idx_fin].strip() != "":
-#         idx_fin += 1
-
-#     # Quitar encabezado de la tabla (desde 'NRC' hasta la primera línea vacía)
-#     lineas = lineas[idx_fin+1:]  # +1 para quitar también la línea vacía
-
-#     return lineas
-
 def limpiar_encabezados(texto):
     """
     Quita las primeras 3 líneas (encabezado general) y el encabezado de la tabla,
@@ -136,9 +111,6 @@ def main():
         texto_pagina = page.get_textpage().extractText()
         text_pag_sin_encabeza = limpiar_encabezados(texto_pagina)
         lineas_utiles = separar_lineas_por_nrc(text_pag_sin_encabeza)
-
-        #lineas_pagina = texto_pagina.split('\n')
-        #lineas_utiles = limpiar_encabezados(lineas_pagina)
         
         # Procesar y parsear cada línea útil
         for linea in lineas_utiles:
