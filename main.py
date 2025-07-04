@@ -216,7 +216,7 @@ def classes():
     Este módulo es, de momento, de autorretroceso
     """)
 
-    fileName = input(" Ingrese el nombre del archivo: ")
+    fileName = input(" Ingrese el nombre del archivo, ubicado dentro del folder SchoolSubjectList: ")
 
     if definirRuta("SchoolSubjectList",fileName):
         if materias != {} and input(" Existen materias ya registradas anteriormente. Desea borrarlas antes de analizar el nuevo archivo? \n(Ingrese \"si\", o cualquier otra cosa para cancelar): ").lower() == "si":
@@ -507,7 +507,7 @@ def import_pdf():
     """)
     fileName = input(" Ingrese el nombre del archivo (Favor de haberlo colocado en la carpeta AcademicSchedule): ")
     pdf_path = os.path.join("AcademicSchedule", fileName)
-    excel_path = os.path.splitext(pdf_path)[0] + ".xlsx"
+    excel_path = os.path.join("SchoolSubjectList", fileName) + ".xlsx"
 
     from extract_pdf import extraer_pdf_a_excel
     exito = extraer_pdf_a_excel(pdf_path, excel_path)
