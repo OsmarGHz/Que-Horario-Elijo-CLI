@@ -45,7 +45,8 @@ def parsear_linea_horario(linea_texto):
         r"([LMAJVSD]+)\s+"              # 5. Días de la semana
         r"(\d{4}-\d{4})\s+"              # 6. Rango de hora (ej. "1100-1159")
         # 7. Profesor (captura robusta de nombres en mayúsculas, con espacios y guiones)
-        r"([A-ZÑÁÉÍÓÚ\s\-]+[A-ZÑÁÉÍÓÚ])\s+"
+        #r"([A-ZÑÁÉÍÓÚ\s\-]+[A-ZÑÁÉÍÓÚ])\s+"
+        r"([A-ZÑÁÉÍÓÚ\s\-.]+)\s+"
         r"(\S+)\s*"                     # 8. Salón (cualquier caracter que no sea espacio)
         r"(.*)$"                        # 9. Aclaraciones (el resto de la línea)
     )
@@ -177,98 +178,98 @@ def extraer_pdf_a_excel(pdf_path, excel_path):
     #     print(f"\n❌ Ocurrió un error al guardar el archivo de Excel: {e}")
     #     return False
 
-def main():
-    """
-    Función principal que orquesta la extracción, selección y exportación usando PyMuPDF.
-    """
-    # --- 1. CONFIGURACIÓN INICIAL ---
-    pdf_path = 'PA_PRIMAVERA.pdf'
-    excel_path = 'Horarios_Seleccionados.xlsx'
+# def main():
+#     """
+#     Función principal que orquesta la extracción, selección y exportación usando PyMuPDF.
+#     """
+#     # --- 1. CONFIGURACIÓN INICIAL ---
+#     pdf_path = 'PA_PRIMAVERA.pdf'
+#     excel_path = 'Horarios_Seleccionados.xlsx'
 
-    if not os.path.exists(pdf_path):
-        print(f"❌ Error: El archivo '{pdf_path}' no se encontró.")
-        print("Asegúrate de que el PDF esté en la misma carpeta que este script.")
-        return
+#     if not os.path.exists(pdf_path):
+#         print(f"❌ Error: El archivo '{pdf_path}' no se encontró.")
+#         print("Asegúrate de que el PDF esté en la misma carpeta que este script.")
+#         return
 
-    # --- 2. EXTRACCIÓN Y PROCESAMIENTO CON PyMuPDF ---
-    print(f"📄 Leyendo el PDF con PyMuPDF: '{pdf_path}'...")
-    cursos_encontrados = []
+#     # --- 2. EXTRACCIÓN Y PROCESAMIENTO CON PyMuPDF ---
+#     print(f"📄 Leyendo el PDF con PyMuPDF: '{pdf_path}'...")
+#     cursos_encontrados = []
     
-    try:
-        doc = pymupdf.open(pdf_path)
-    except Exception as e:
-        print(f"❌ Error al abrir el PDF. Puede que esté dañado o protegido. Error: {e}")
-        return
+#     try:
+#         doc = pymupdf.open(pdf_path)
+#     except Exception as e:
+#         print(f"❌ Error al abrir el PDF. Puede que esté dañado o protegido. Error: {e}")
+#         return
 
-    # Extraer texto de todas las páginas y aplicar las reglas de limpieza
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        texto_pagina = page.get_textpage().extractText()
-        text_pag_sin_encabeza = limpiar_encabezados(texto_pagina)
-        lineas_utiles = separar_lineas_por_nrc(text_pag_sin_encabeza)
+#     # Extraer texto de todas las páginas y aplicar las reglas de limpieza
+#     for page_num in range(len(doc)):
+#         page = doc.load_page(page_num)
+#         texto_pagina = page.get_textpage().extractText()
+#         text_pag_sin_encabeza = limpiar_encabezados(texto_pagina)
+#         lineas_utiles = separar_lineas_por_nrc(text_pag_sin_encabeza)
         
-        # Procesar y parsear cada línea útil
-        for linea in lineas_utiles:
+#         # Procesar y parsear cada línea útil
+#         for linea in lineas_utiles:
             
-            # Solo procesar líneas que empiecen con un NRC
-            if re.match(r"^\d{5}", linea):
-                datos_curso = parsear_linea_horario(linea)
-                if datos_curso:
-                    if datos_curso not in cursos_encontrados:
-                        cursos_encontrados.append(datos_curso)
+#             # Solo procesar líneas que empiecen con un NRC
+#             if re.match(r"^\d{5}", linea):
+#                 datos_curso = parsear_linea_horario(linea)
+#                 if datos_curso:
+#                     if datos_curso not in cursos_encontrados:
+#                         cursos_encontrados.append(datos_curso)
 
-    doc.close()
+#     doc.close()
 
-    if not cursos_encontrados:
-        print("❌ No se encontraron cursos con el formato esperado en el PDF.")
-        print("Verifica que el PDF no sea una imagen escaneada y que la estructura sea la correcta.")
-        return
+#     if not cursos_encontrados:
+#         print("❌ No se encontraron cursos con el formato esperado en el PDF.")
+#         print("Verifica que el PDF no sea una imagen escaneada y que la estructura sea la correcta.")
+#         return
 
-    print(f"\n✅ ¡Se encontraron {len(cursos_encontrados)} clases únicas en el PDF!")
+#     print(f"\n✅ ¡Se encontraron {len(cursos_encontrados)} clases únicas en el PDF!")
 
-    # --- 3. SELECCIÓN DE NRC's POR EL USUARIO ---
-    nrcs_seleccionados = []
-    print("\n--- Selección de Cursos ---")
-    print("Ingresa el NRC de cada curso que quieras añadir a tu horario.")
-    print("Cuando termines, escribe 'listo' y presiona Enter.\n")
+#     # --- 3. SELECCIÓN DE NRC's POR EL USUARIO ---
+#     nrcs_seleccionados = []
+#     print("\n--- Selección de Cursos ---")
+#     print("Ingresa el NRC de cada curso que quieras añadir a tu horario.")
+#     print("Cuando termines, escribe 'listo' y presiona Enter.\n")
 
-    cursos_para_mostrar = {}
-    for curso in cursos_encontrados:
-        cursos_para_mostrar.setdefault(curso['NRC'], curso)
+#     cursos_para_mostrar = {}
+#     for curso in cursos_encontrados:
+#         cursos_para_mostrar.setdefault(curso['NRC'], curso)
             
-    for nrc, curso in cursos_para_mostrar.items():
-        print(f"➡️  NRC: {curso['NRC']}, Materia: {curso['Materia']}, Profesor: {curso['Profesor']}")
+#     for nrc, curso in cursos_para_mostrar.items():
+#         print(f"➡️  NRC: {curso['NRC']}, Materia: {curso['Materia']}, Profesor: {curso['Profesor']}")
 
-    while True:
-        entrada = input("\nIngresa un NRC para agregarlo (o escribe 'listo' para terminar): ").strip().lower()
+#     while True:
+#         entrada = input("\nIngresa un NRC para agregarlo (o escribe 'listo' para terminar): ").strip().lower()
 
-        if entrada == 'listo':
-            if not nrcs_seleccionados:
-                print("⚠️ No seleccionaste ningún NRC. El programa terminará.")
-                return
-            print("\n✅ Selección finalizada. Generando el archivo de Excel...")
-            break
-        elif entrada.isdigit() and len(entrada) == 5:
-            if entrada in nrcs_seleccionados:
-                print(f"✔️  El NRC {entrada} ya había sido agregado.")
-            elif entrada in cursos_para_mostrar:
-                nrcs_seleccionados.append(entrada)
-                print(f"👍 NRC {entrada} agregado. Seleccionados hasta ahora: {', '.join(nrcs_seleccionados)}")
-            else:
-                print(f"❌ El NRC {entrada} no se encontró en la lista de cursos. Intenta de nuevo.")
-        else:
-            print("❌ Entrada no válida. Por favor, ingresa un NRC de 5 dígitos o la palabra 'listo'.")
+#         if entrada == 'listo':
+#             if not nrcs_seleccionados:
+#                 print("⚠️ No seleccionaste ningún NRC. El programa terminará.")
+#                 return
+#             print("\n✅ Selección finalizada. Generando el archivo de Excel...")
+#             break
+#         elif entrada.isdigit() and len(entrada) == 5:
+#             if entrada in nrcs_seleccionados:
+#                 print(f"✔️  El NRC {entrada} ya había sido agregado.")
+#             elif entrada in cursos_para_mostrar:
+#                 nrcs_seleccionados.append(entrada)
+#                 print(f"👍 NRC {entrada} agregado. Seleccionados hasta ahora: {', '.join(nrcs_seleccionados)}")
+#             else:
+#                 print(f"❌ El NRC {entrada} no se encontró en la lista de cursos. Intenta de nuevo.")
+#         else:
+#             print("❌ Entrada no válida. Por favor, ingresa un NRC de 5 dígitos o la palabra 'listo'.")
 
-    # --- 4. EXPORTACIÓN A EXCEL ---
-    clases_a_exportar = [curso for curso in cursos_encontrados if curso['NRC'] in nrcs_seleccionados]
-    df = pd.DataFrame(clases_a_exportar)
-    df = df[['NRC', 'Materia', 'Profesor', 'Hora de inicio', 'Hora de fin', 'Dia', 'Salon']]
+#     # --- 4. EXPORTACIÓN A EXCEL ---
+#     clases_a_exportar = [curso for curso in cursos_encontrados if curso['NRC'] in nrcs_seleccionados]
+#     df = pd.DataFrame(clases_a_exportar)
+#     df = df[['NRC', 'Materia', 'Profesor', 'Hora de inicio', 'Hora de fin', 'Dia', 'Salon']]
 
-    try:
-        df.to_excel(excel_path, index=False, header=False)
-        print(f"\n🎉 ¡Éxito! Se ha creado el archivo '{excel_path}' con todas las clases de los NRCs que seleccionaste.")
-    except Exception as e:
-        print(f"\n❌ Ocurrió un error al guardar el archivo de Excel: {e}")
+#     try:
+#         df.to_excel(excel_path, index=False, header=False)
+#         print(f"\n🎉 ¡Éxito! Se ha creado el archivo '{excel_path}' con todas las clases de los NRCs que seleccionaste.")
+#     except Exception as e:
+#         print(f"\n❌ Ocurrió un error al guardar el archivo de Excel: {e}")
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

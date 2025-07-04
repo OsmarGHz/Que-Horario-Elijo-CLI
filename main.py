@@ -1,9 +1,7 @@
 import os.path
 import os
 #pip install pandas
-#pip install openpyxl
-#pip install pdfplumber
-import openpyxl
+#pip install PyMuPDF
 import pandas as pd
 import itertools
 import math
@@ -52,9 +50,24 @@ def imprimirMensajeListo():
     Listo!
     """)
 
+# █▀▀ ▀█▀ ▀█▀ █▀█ █░█ ░█░ █▀█░█░█ ▀▀█
+# █░█ ░█░ ░█░ █▄█ █░█ ░█░ █░█░█▀█ ░█▀
+# ▀▀▀ ░▀░ ▀▀░ ▀░▀ ▀▀▀ ░▀▀ ▀░▀░▀░▀ ░▀░
+
 def introPrograma():
     print("""
-    ¡Bienvenido a ¿Qué horario elijo?!
+        ¡Bienvenido a
+        
+          
+        ▄▀▀▄░█░█░█▀▀░░█░█░█▀█░█▀█░█▀█░█▀█░▀█▀░█▀█
+       ░█░▄█░█░█░█▀▀░░█▀█░█░█░█▀▄░█▀█░█▀▄░░█░░█░█
+        ░▀▀▀░▀▀▀░▀▀▀░░▀░▀░▀▀▀░▀░▀░▀░▀░▀░▀░▀▀▀░▀▀▀
+
+        ░█▀▀░░█░░▀█▀░▀█▀░█▀█░░▀▀█
+        ░█▀▀░░█░░░█░░░█░░█░█░░░█▀
+        ░▀▀▀░░▀▀░▀▀▀░▀▀░░▀▀▀░░░▄░
+    
+          
     Te preocupa la eleccion de materias? Nosotros lo aceleramos!
     """)
 
@@ -63,7 +76,7 @@ def mostrarAyuda(seccion): #Mostrar aiuda
         print("""
         Permítenos darte nuestro menú de opciones:
             help \t\t Muestra esta ayuda
-            import-pdf \t\tImporta un PDF de materias (SOLO BUAP FCC, por ahora), selecciona los profes que quieras, y genera un Excel que puedes procesar en la seccion \"classes\"
+            import-pdf \t\t Importa un PDF de materias (SOLO BUAP FCC, por ahora), selecciona los profes que quieras, y genera un Excel que puedes procesar en la seccion \"classes\"
             classes \t\t Guarda o elimina tus clases
             calendars \t\t Administra tus calendarios, y genera nuevos en base a tus clases (dentro, podrás pushear tu calendario a Calendar)
             exit \t\t Simplemente, sale del programa
