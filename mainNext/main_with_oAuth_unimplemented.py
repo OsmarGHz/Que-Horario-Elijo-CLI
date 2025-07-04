@@ -9,7 +9,18 @@ import itertools
 import math
 
 from datetime import datetime, time
-from extract_pdf import extraer_pdf_a_excel
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
+]
 
 materias = {}
 resultados = {}
@@ -55,22 +66,34 @@ def imprimirMensajeListo():
 def introPrograma():
     print("""
     ¡Bienvenido a ¿Qué horario elijo?!
-    Te preocupa la eleccion de materias? Nosotros lo aceleramos!
+    En este programa, tú agregas tus opciones de clases por separado para este semestre, y nosotros haremos la magia!
+    Con nuestros calendarios que puedes agregar a Google Calendar, te ahorrarás tiempo!
     """)
 
 def mostrarAyuda(seccion): #Mostrar aiuda
     if equivalStr(seccion,"principal"):
         print("""
         Permítenos darte nuestro menú de opciones:
+            account \t\t Agrega, elimina, o ve el correo de google que agregaste.
             help \t\t Muestra esta ayuda
             import-pdf \t\tImporta un PDF de materias (SOLO BUAP FCC, por ahora), selecciona los profes que quieras, y genera un Excel que puedes procesar en la seccion \"classes\"
             classes \t\t Guarda o elimina tus clases
             calendars \t\t Administra tus calendarios, y genera nuevos en base a tus clases (dentro, podrás pushear tu calendario a Calendar)
             exit \t\t Simplemente, sale del programa
         """)
+    elif equivalStr(seccion,"account"):
+        print("""
+        Estás en principal -> account (sección para gestionar las cuentas). Aquí puedes escribir:
+            connect \t\t Conecta esta app con tu cuenta de Google
+            disconnect \t\t Desconecta tu cuenta de Google, de esta app
+            seeInfo \t\t Ver el correo que tienes agregado
+            help \t\t Muestra esta ayuda
+            return \t\t Regresa a la sección anterior
+            exit \t\t Simplemente, sale del programa
+        """)
     elif equivalStr(seccion,"calendars"):
         print("""
-        Estás en principal -> calendars (sección para gestionar los calendarios, de momento no puedes pushearlos a plataformas de calendarios). Aquí puedes escribir:
+        Estás en principal -> calendars (sección para gestionar los calendarios y pushearlos a Calendar). Aquí puedes escribir:
             printClasses
             generateCalendars
             chargeCals
@@ -102,6 +125,118 @@ def mostrarErrorNumerico():
     print("""
     El numero ingresado está fuera de rango, o la entrada no es valida
     """)
+
+def connect():
+    print("""
+    \t--- Conéctate con Google Calendar. ---\t
+    """)
+    creds = None
+    if os.path.exists("token.json"):
+        print("Ya hay una cuenta conectada.")
+        resp = input("¿Quieres reemplazarla? (s/n): ").strip().lower()
+        if resp != "s":
+            print("""
+            Operación cancelada.
+            """)
+            return
+        else:
+            os.remove("token.json")
+            print("""
+            Cuenta anterior desconectada.
+            """)
+    flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+    creds = flow.run_local_server(port=0)
+    with open("token.json", "w") as token:
+        token.write(creds.to_json())
+    print("""
+    ¡Cuenta conectada exitosamente!
+    """)
+
+def disconnect():
+    print("""
+    \t--- Desconecta tu cuenta. ---\t
+    """)
+
+    if not os.path.exists("token.json"):
+        print("""
+        No hay cuentas conectadas.
+        """)
+    else:
+        resp = input("¿Seguro que quieres cerrar tu sesión? (s/n): ").strip().lower()
+        if resp != "s":
+            print("""
+            Operación cancelada.
+            """)
+            return
+        else:
+            os.remove("token.json")
+            print("""
+            ¡Cuenta DESconectada exitosamente!
+            """)
+
+def seeInfo():
+    print("""
+    \t--- Verificando tus datos... ---\t
+    """)
+    if not os.path.exists("token.json"):
+        print("""
+        No hay cuentas conectadas.
+        """)
+        return
+    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    if creds and creds.valid:
+        try:
+            service = build('oauth2', 'v2', credentials=creds)
+            user_info = service.userinfo().get().execute() # pylint: disable=no-member -> quita esto si tienes otros problemas
+            email = user_info.get("email", "Correo no disponible")
+            name = user_info.get("name", "Nombre no disponible")
+            print(f"""
+            Cuenta conectada: {name} <{email}>
+            """)
+        except Exception as e:
+            print("No se pudo obtener la información de la cuenta.")
+            print(e)
+    else:
+        print("""
+        Lo sentimos, no pudimos obtener la información de la cuenta.
+        Has ingresado correctamente tu cuenta?
+        Has intentado cerrar sesion y volverla a abrir?
+        """)
+
+def selectActAccount(entrada): #Retorna 1 si no es necesario salir. 0 si regresa 1 nivel, -1 si sale abruptamente el usuario, y 2 si está regresando de connect, seeInfo, u otra funcion
+    if equivalStr(entrada,"help"):
+        mostrarAyuda("account")
+    elif equivalStr(entrada,"connect"):
+        connect()
+    elif equivalStr(entrada,"disconnect"):
+        disconnect()
+    elif equivalStr(entrada,"seeInfo"):
+        seeInfo()
+    elif equivalStr(entrada,"return"):
+        return regresar()
+    elif equivalStr(entrada,"exit"):
+        return mostrarDespedida()
+    else:
+        return mostrarError()
+    return 2
+
+def account():
+    showHeader = True
+    retorno = 1
+    while retorno > 0:
+        if showHeader is True:
+            print("""
+            \t\t-----Módulo de conexión con Google Calendar-----\t\t
+            """)
+            mostrarAyuda("account")
+        entrada = input(" -> ")
+        retorno = selectActAccount(entrada)
+        if retorno == 2:
+            showHeader = True
+        else:
+            showHeader = False
+
+    return retorno
 
 def limpiarMaterias():
     global materias
@@ -501,30 +636,19 @@ def calendars():
 
     return retorno
 
-def import_pdf():
-    print("""
-    \t\t-----Módulo de Subir tu documento de Programación Académica-----\t\t
-    """)
-    fileName = input(" Ingrese el nombre del archivo (Favor de haberlo colocado en la carpeta AcademicSchedule): ")
-    pdf_path = os.path.join("AcademicSchedule", fileName)
-    excel_path = os.path.splitext(pdf_path)[0] + ".xlsx"
-
-    from extract_pdf import extraer_pdf_a_excel
-    exito = extraer_pdf_a_excel(pdf_path, excel_path)
-    if exito:
-        print(f"Archivo Excel generado: {excel_path}")
-    else:
-        print("No se pudo generar el archivo Excel.")
 
 def selectFunction(entrada):
     if equivalStr(entrada,"help"):
         mostrarAyuda("principal")
-    elif equivalStr(entrada, "import-pdf"):
-        import_pdf()
+    elif equivalStr(entrada,"account"):
+        if account() == -1:
+            return -1
     elif equivalStr(entrada,"classes"):
         classes()
     elif equivalStr(entrada,"calendars"):
         calendars()
+    elif equivalStr(entrada, "import-pdf"):
+        import_pdf()
     elif equivalStr(entrada,"exit"):
         return mostrarDespedida()
     else:

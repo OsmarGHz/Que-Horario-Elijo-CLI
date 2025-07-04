@@ -49,7 +49,9 @@ def separar_lineas_por_nrc(texto_sin_encabeza):
     for linea in patron.split(texto_sin_encabeza):
         linea = linea.strip()
         if linea:
-            lineas.append(linea)
+            # Limpiar dobles espacios que pueden interferir con el regex
+            linea_limpia = re.sub(r'\s+', ' ', linea)
+            lineas.append(linea_limpia)
     return lineas
 
 
@@ -73,8 +75,13 @@ def parsear_linea_horario(linea_texto):
         r"(.*)$"                        # 9. Aclaraciones (el resto de la línea)
     )
 
+    # coincidencia = patron.search(linea_texto)
+    # if not coincidencia:
+    #     return None
+
     coincidencia = patron.search(linea_texto)
-    if not coincidencia:
+    if not coincidencia or len(coincidencia.groups()) < 9:
+        print("Línea no válida para el regex:", repr(linea_texto))  # Descomenta para depurar
         return None
 
     grupos = coincidencia.groups()
@@ -84,7 +91,8 @@ def parsear_linea_horario(linea_texto):
     # Diccionario con los datos limpios y extraídos
     datos = {
         "NRC": grupos[0].strip(),
-        "Materia": f"{grupos[1].strip()} {grupos[2].strip()}",
+        "Clave": f"{grupos[1].strip()}",
+        "Materia": f"{grupos[2].strip()}",
         "Profesor": grupos[6].strip(),
         "Hora de inicio": hora_inicio.strip(),
         "Hora de fin": hora_fin.strip(),
@@ -134,12 +142,10 @@ def main():
         
         # Procesar y parsear cada línea útil
         for linea in lineas_utiles:
-            # Limpiar dobles espacios que pueden interferir con el regex
-            linea_limpia = re.sub(r'\s+', ' ', linea) ##CHECA ESTO: MMM... sospechoso
             
             # Solo procesar líneas que empiecen con un NRC
-            if re.match(r"^\d{5}", linea_limpia):
-                datos_curso = parsear_linea_horario(linea_limpia)
+            if re.match(r"^\d{5}", linea):
+                datos_curso = parsear_linea_horario(linea)
                 if datos_curso:
                     if datos_curso not in cursos_encontrados:
                         cursos_encontrados.append(datos_curso)
@@ -151,7 +157,7 @@ def main():
         print("Verifica que el PDF no sea una imagen escaneada y que la estructura sea la correcta.")
         return
 
-    print(f"✅ ¡Se encontraron {len(cursos_encontrados)} clases únicas en el PDF!")
+    print(f"\n✅ ¡Se encontraron {len(cursos_encontrados)} clases únicas en el PDF!")
 
     # --- 3. SELECCIÓN DE NRC's POR EL USUARIO ---
     nrcs_seleccionados = []
@@ -192,7 +198,7 @@ def main():
     df = df[['NRC', 'Materia', 'Profesor', 'Hora de inicio', 'Hora de fin', 'Dia', 'Salon']]
 
     try:
-        df.to_excel(excel_path, index=False)
+        df.to_excel(excel_path, index=False, header=False)
         print(f"\n🎉 ¡Éxito! Se ha creado el archivo '{excel_path}' con todas las clases de los NRCs que seleccionaste.")
     except Exception as e:
         print(f"\n❌ Ocurrió un error al guardar el archivo de Excel: {e}")
