@@ -2,6 +2,7 @@ import os.path
 import os
 #pip install pandas
 #pip install openpyxl
+#pip install pdfplumber
 import openpyxl
 import pandas as pd
 import itertools
@@ -75,6 +76,7 @@ def mostrarAyuda(seccion): #Mostrar aiuda
         Permítenos darte nuestro menú de opciones:
             account \t\t Agrega, elimina, o ve el correo de google que agregaste.
             help \t\t Muestra esta ayuda
+            import-pdf \t\tImporta un PDF de materias (SOLO BUAP FCC, por ahora), selecciona los profes que quieras, y genera un Excel que puedes procesar en la seccion \"classes\"
             classes \t\t Guarda o elimina tus clases
             calendars \t\t Administra tus calendarios, y genera nuevos en base a tus clases (dentro, podrás pushear tu calendario a Calendar)
             exit \t\t Simplemente, sale del programa
@@ -645,6 +647,8 @@ def selectFunction(entrada):
         classes()
     elif equivalStr(entrada,"calendars"):
         calendars()
+    elif equivalStr(entrada, "import-pdf"):
+        import_pdf()
     elif equivalStr(entrada,"exit"):
         return mostrarDespedida()
     else:
