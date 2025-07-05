@@ -2,6 +2,7 @@ import os.path
 import os
 #pip install pandas
 #pip install PyMuPDF
+#pip install openpyxl
 import pandas as pd
 import itertools
 import math
@@ -67,7 +68,9 @@ def introPrograma():
         ░█▀▀░░█░░░█░░░█░░█░█░░░█▀
         ░▀▀▀░░▀▀░▀▀▀░▀▀░░▀▀▀░░░▄░
     
-          
+        
+        Versión 0.1 Beta
+
     Te preocupa la eleccion de materias? Nosotros lo aceleramos!
     """)
 
