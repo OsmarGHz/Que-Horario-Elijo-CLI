@@ -26,6 +26,9 @@ def check_and_install():
             print(f"Instalando {pip_name}...")
             try:
                 subprocess.check_call([sys.executable, "-m", "pip", "install", pip_name])
+            except FileNotFoundError:
+                print(f"No se pudo encontrar 'pip'. Por favor, instala pip antes de continuar.\nGuía oficial: https://pip.pypa.io/en/stable/installation/")
+                sys.exit(1)
             except Exception as e:
                 print(f"No se pudo instalar {pip_name}: {e}")
         print("\nIntenta ejecutar el programa nuevamente.")
