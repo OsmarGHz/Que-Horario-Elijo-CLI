@@ -1,3 +1,14 @@
+
+# Comprobación de dependencias antes de cualquier otra importación
+import sys
+import subprocess
+try:
+    import check_dependencies
+    check_dependencies.check_and_install()
+except ImportError:
+    # Si el archivo no existe, continuar (pero advertir)
+    print("Advertencia: No se encontró 'check_dependencies.py'. Asegúrate de tener las dependencias instaladas: pandas, openpyxl, PyMuPDF.")
+
 import os.path
 import os
 #pip install pandas
@@ -6,7 +17,6 @@ import os
 import pandas as pd
 import itertools
 import math
-
 from datetime import datetime, time
 from extract_pdf import extraer_pdf_a_excel
 
