@@ -79,7 +79,7 @@ def introPrograma():
         ░▀▀▀░░▀▀░▀▀▀░▀▀░░▀▀▀░░░▄░
     
         
-        Versión 0.1.1 Beta
+        Versión 0.1.2 Beta
 
     Te preocupa la eleccion de materias? Nosotros lo aceleramos!
     """)
@@ -550,7 +550,8 @@ def selectFunction(entrada):
     elif equivalStr(entrada,"classes"):
         classes()
     elif equivalStr(entrada,"calendars"):
-        calendars()
+        if calendars() == -1:
+            return -1
     elif equivalStr(entrada,"exit"):
         return mostrarDespedida()
     else:
