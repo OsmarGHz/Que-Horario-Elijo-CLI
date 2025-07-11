@@ -79,7 +79,7 @@ def introPrograma():
         ░▀▀▀░░▀▀░▀▀▀░▀▀░░▀▀▀░░░▄░
     
         
-        Versión 0.1 Beta
+        Versión 0.1.1 Beta
 
     Te preocupa la eleccion de materias? Nosotros lo aceleramos!
     """)
